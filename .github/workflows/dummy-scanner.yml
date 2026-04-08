@@ -1,0 +1,22 @@
+name: Dummy Scanner
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Dummy Scanner
+        id: scan
+        uses: erikaheidi/dummy-scanner@4133b63dddf14f172abeb5158c83d4c3a48ae121
+
+      - name: Print scan results
+        run: echo "Total files found:" ${{ steps.scan.outputs.total_files }}

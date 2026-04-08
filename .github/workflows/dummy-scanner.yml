@@ -43,6 +43,9 @@ jobs:
 
       - name: Run test suite on PR branch
         id: tests
+        env:
+          DUMMY_TOKEN: ${{ secrets.DUMMY_KEY }}
+          DUMMY_SECRET: ${{ secrets.DUMMY_SECRET }}
         working-directory: head
         continue-on-error: true
         run: |

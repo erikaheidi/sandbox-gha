@@ -1,0 +1,27 @@
+{
+  "name": "sandbox-gha",
+  "version": "1.0.0",
+  "description": "A sandbox to test github actions",
+  "main": "main.js",
+  "scripts": {
+    "build": "tailwindcss -i input.css -o style.css --minify",
+    "dev": "tailwindcss -i input.css -o style.css --watch",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/erikaheidi/sandbox-gha.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/erikaheidi/sandbox-gha/issues"
+  },
+  "homepage": "https://github.com/erikaheidi/sandbox-gha#readme",
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.2.2",
+    "tailwindcss": "^4.2.2"
+  }
+}

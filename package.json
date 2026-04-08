@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tailwindcss -i input.css -o style.css --minify",
     "dev": "tailwindcss -i input.css -o style.css --watch",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -22,6 +22,8 @@
   "homepage": "https://github.com/erikaheidi/sandbox-gha#readme",
   "devDependencies": {
     "@tailwindcss/cli": "^4.2.2",
+    "jest": "^30.3.0",
+    "supertest": "^7.2.2",
     "tailwindcss": "^4.2.2"
   }
 }

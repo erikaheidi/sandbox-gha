@@ -6,17 +6,52 @@ on:
 
 permissions:
   contents: read
+  pull-requests: write
 
 jobs:
   scan:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout base branch
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
 
-      - name: Run Dummy Scanner
-        id: scan
+      - name: Run Dummy Scanner on base branch
+        id: scan_base
         uses: erikaheidi/dummy-scanner@4133b63dddf14f172abeb5158c83d4c3a48ae121
 
-      - name: Print scan results
-        run: echo "Total files found:" ${{ steps.scan.outputs.total_files }}
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Run Dummy Scanner on PR branch
+        id: scan_pr
+        uses: erikaheidi/dummy-scanner@4133b63dddf14f172abeb5158c83d4c3a48ae121
+
+      - name: Comment on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const base = parseInt('${{ steps.scan_base.outputs.total_files }}');
+            const pr = parseInt('${{ steps.scan_pr.outputs.total_files }}');
+            const diff = pr - base;
+            const diffLabel = diff > 0 ? `+${diff} files added` : diff < 0 ? `${Math.abs(diff)} files removed` : 'No change in file count';
+            const diffIcon = diff > 0 ? '📈' : diff < 0 ? '📉' : '✅';
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: [
+                '## Dummy Scanner Results',
+                '',
+                '| Branch | Total Files |',
+                '|--------|-------------|',
+                `| Base (\`${{ github.base_ref }}\`) | ${base} |`,
+                `| PR (\`${{ github.head_ref }}\`) | ${pr} |`,
+                '',
+                `${diffIcon} **${diffLabel}**`
+              ].join('\n')
+            });

@@ -16,6 +16,9 @@
   "author": "",
   "license": "ISC",
   "type": "commonjs",
+  "jest": {
+    "globalSetup": "./jest.globalSetup.js"
+  },
   "bugs": {
     "url": "https://github.com/erikaheidi/sandbox-gha/issues"
   },

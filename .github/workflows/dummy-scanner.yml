@@ -1,7 +1,7 @@
 name: Dummy Scanner
 
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, synchronize]
 
 permissions:
@@ -36,15 +36,40 @@ jobs:
         with:
           directory: head
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run test suite on PR branch
+        id: tests
+        working-directory: head
+        continue-on-error: true
+        run: |
+          npm ci
+          npm test -- --json --outputFile=../test-results.json
+
       - name: Comment on PR
         uses: actions/github-script@v7
         with:
           script: |
+            const fs = require('fs');
+
             const base = parseInt('${{ steps.scan_base.outputs.total_files }}');
             const pr = parseInt('${{ steps.scan_pr.outputs.total_files }}');
             const diff = pr - base;
             const diffLabel = diff > 0 ? `+${diff} files added` : diff < 0 ? `${Math.abs(diff)} files removed` : 'No change in file count';
             const diffIcon = diff > 0 ? '📈' : diff < 0 ? '📉' : '✅';
+
+            let testSummary = '⚠️ Test results unavailable';
+            try {
+              const results = JSON.parse(fs.readFileSync('test-results.json', 'utf8'));
+              const icon = results.success ? '✅' : '❌';
+              testSummary = `${icon} **${results.numPassedTests}/${results.numTotalTests} tests passed**`;
+              if (results.numFailedTests > 0) {
+                testSummary += ` (${results.numFailedTests} failed)`;
+              }
+            } catch (e) {}
 
             github.rest.issues.createComment({
               issue_number: context.issue.number,
@@ -58,6 +83,10 @@ jobs:
                 `| Base (\`${{ github.base_ref }}\`) | ${base} |`,
                 `| PR (\`${{ github.head_ref }}\`) | ${pr} |`,
                 '',
-                `${diffIcon} **${diffLabel}**`
+                `${diffIcon} **${diffLabel}**`,
+                '',
+                '## Test Suite Results',
+                '',
+                testSummary
               ].join('\n')
             });
